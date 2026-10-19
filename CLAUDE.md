@@ -8,6 +8,10 @@ Redfox is Rohit's personal macOS menu bar app (Swift Package, SwiftUI plus AppKi
 - The app's updater (`Updater.swift`) reads `releases/latest` from `rohitDurbha/Redfox` and expects a `.dmg` asset containing `Redfox.app`.
 - After pushing, check the run with `gh run list --repo rohitDurbha/Redfox` and `gh run view <id> --log-failed`. Fix compile errors before telling Rohit a release is ready.
 
+## Commit identity
+
+- Every commit must be authored and committed as `Rohit Durbha <55520009+rohitDurbha@users.noreply.github.com>`. Set this with `git config user.name` and `git config user.email` in the clone before committing.
+
 ## Code rules
 
 - Do not use `@State`. On the newest command line tools it is a macro whose plugin only ships with full Xcode, so local builds break. Use `@StateObject private var x = ViewState(value)` and `$x.value` instead (`ViewState` lives in App.swift).
