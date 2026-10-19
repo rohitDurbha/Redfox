@@ -38,6 +38,8 @@ Start dragging any file in Finder, and while you are still holding the mouse but
 | Command | Tools | Compress, edit, crop, redact, annotate, trim, split, change speed, view or remove metadata and more |
 | Control | Actions | AirDrop, float on a shelf, copy, move, copy the path or open the folder in Terminal |
 
+As you move a file across the wheel, each petal you pass gives a light tap on the trackpad and a soft click, which makes the wheel feel tactile. You can choose how strong the tap is, pick a different sound or turn either one off in Settings, which opens from the fox menu or with Command and comma.
+
 Every result is saved beside the original with a short suffix such as "compressed" or "edited", and Redfox never overwrites the file you started with.
 
 ## About the bundled media engine
@@ -72,6 +74,7 @@ scripts/install-local.sh
 | `Sources/Redfox/Editors.swift` | Image editor, background editor, compress dialog, trim player, metadata viewer and PDF organizer |
 | `Sources/Redfox/Shelf.swift` | File actions and the floating shelf |
 | `Sources/Redfox/Onboarding.swift` | The welcome screens |
+| `Sources/Redfox/Feedback.swift` | Haptic and sound feedback for the wheel, stored preferences and the Settings window |
 | `Sources/Redfox/Updater.swift` | Checks GitHub releases and installs updates in place |
 | `scripts/build-app.sh` | Compiles the code, bundles ffmpeg and assembles Redfox.app |
 | `scripts/fetch-ffmpeg.sh` | Downloads the pinned static ffmpeg build and verifies its checksum |

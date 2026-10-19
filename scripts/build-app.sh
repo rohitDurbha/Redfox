@@ -21,7 +21,7 @@ cp Resources/Info.plist "$APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$APP/Contents/Info.plist"
 iconutil -c icns Resources/AppIcon.iconset -o "$APP/Contents/Resources/AppIcon.icns"
-cp Resources/MenuBarIcon.png Resources/MenuBarIcon@2x.png Resources/Logo.png "$APP/Contents/Resources/"
+cp Resources/MenuBarIcon.png Resources/MenuBarIcon@2x.png Resources/Logo.png Resources/Click.wav "$APP/Contents/Resources/"
 
 echo "==> Bundling ffmpeg"
 scripts/fetch-ffmpeg.sh

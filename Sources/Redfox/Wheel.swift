@@ -297,7 +297,10 @@ final class WheelDropView: NSView {
 
     override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
         let index = segment(for: sender)
-        if controller?.model.highlighted != index { controller?.model.highlighted = index }
+        if controller?.model.highlighted != index {
+            controller?.model.highlighted = index
+            if index != nil { Feedback.hover() }
+        }
         return index == nil ? [] : operation(for: sender)
     }
 
@@ -311,6 +314,7 @@ final class WheelDropView: NSView {
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         guard let index = segment(for: sender) else { return false }
+        Feedback.drop()
         let urls = (sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL]) ?? []
         controller?.perform(index: index, urls: urls)
         return true

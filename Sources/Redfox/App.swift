@@ -31,15 +31,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 struct MenuContent: View {
-    @StateObject private var launchAtLogin = ViewState(LoginItem.isEnabled)
     @StateObject private var paused = ViewState(false)
 
     var body: some View {
         Button("How to Use Redfox") { Onboarding.show() }
+        Button("Settings…") { SettingsWindow.show() }
+            .keyboardShortcut(",")
         Button("Check for Updates…") { Updater.check(userInitiated: true) }
         Divider()
-        Toggle("Launch at Login", isOn: $launchAtLogin.value)
-            .onChange(of: launchAtLogin.value) { LoginItem.set($0) }
         Toggle("Pause Redfox", isOn: $paused.value)
             .onChange(of: paused.value) { DragMonitor.shared.paused = $0 }
         Divider()
