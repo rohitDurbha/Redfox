@@ -11,6 +11,7 @@ Redfox is Rohit's personal macOS menu bar app (Swift Package, SwiftUI plus AppKi
 ## Commit identity
 
 - Every commit must be authored and committed as `Rohit Durbha <55520009+rohitDurbha@users.noreply.github.com>`. Set this with `git config user.name` and `git config user.email` in the clone before committing.
+- Do not add `Co-Authored-By` or `Claude-Session` trailers, or any other Claude attribution, to commit messages or pull requests. Rohit asked for these to be left out.
 
 ## Code rules
 
