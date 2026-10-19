@@ -46,11 +46,13 @@ Every result is saved beside the original with a short suffix such as "compresse
 
 The ffmpeg binary comes from the static Apple silicon builds published at [ffmpeg.martin-riedl.de](https://ffmpeg.martin-riedl.de), and its version is pinned in `scripts/fetch-ffmpeg.sh`. Each build checks the download against its published checksum, and the release workflow then tests every encoder Redfox uses before it publishes a new disk image. ffmpeg is free software released under the GPL, and its complete source code is available from [ffmpeg.org](https://ffmpeg.org/download.html).
 
-## How releases are made
+## How changes and releases are made
 
-Every push to the main branch starts the workflow in `.github/workflows/release.yml`, which builds Redfox on a GitHub Mac, packages Redfox.dmg and publishes it as the newest release. The version number is `1.0.` followed by the workflow run number, so each push produces a higher version that the app recognizes as an update. Pull requests are built and checked in the same way, but they do not publish a release.
+Every change is made on its own branch, named after the release it will become, such as `release/v1.0.9`, and arrives as a pull request into main. The version number lives in the `VERSION` file, and each branch raises it by one step.
 
-You can follow each build on the [Actions page](https://github.com/rohitDurbha/Redfox/actions), and a failed build there means the release was not published.
+When a pull request opens, the workflow in `.github/workflows/release.yml` builds Redfox on a GitHub Mac, runs the encoder tests and confirms that the new version is higher than the latest release. Nothing is published at that stage, so a mistake can be caught and fixed before it reaches main.
+
+Merging the pull request builds Redfox again, packages Redfox.dmg and publishes it as release `v` followed by the version number. The app then offers that release as an update. You can follow every build on the [Actions page](https://github.com/rohitDurbha/Redfox/actions).
 
 ## Building on your own Mac
 

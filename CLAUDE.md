@@ -2,9 +2,17 @@
 
 Redfox is Rohit's personal macOS menu bar app (Swift Package, SwiftUI plus AppKit, macOS 13+). It shows a radial glass wheel when a Finder drag is in progress and a modifier is tapped (Shift = convert, Command = tools, Control = actions).
 
+## Branches and pull requests
+
+- Never commit or push directly to `main`. Every change goes on a feature branch named after the release it will become, for example `release/v1.0.9`, and reaches `main` only through a pull request.
+- On that branch, raise the number in the `VERSION` file to the new release (one patch step above the latest release unless Rohit asks otherwise).
+- Push the branch, open a pull request into `main` through the REST API (`gh api repos/rohitDurbha/Redfox/pulls -f head=... -f base=main ...`), and wait for its checks to pass. Fix any failures on the same branch.
+- Rohit reviews and merges the pull request himself. Do not merge it unless he explicitly asks.
+
 ## Releasing
 
-- Pushing to `main` runs `.github/workflows/release.yml` on `macos-15`, builds `build/Redfox.dmg` and publishes release `v1.0.<run_number>`.
+- Merging a pull request into `main` runs `.github/workflows/release.yml` on `macos-15`, builds `build/Redfox.dmg` and publishes release `v<VERSION>`.
+- Pull request builds run the same build and encoder tests and fail if `VERSION` is not higher than the latest release, but they never publish anything.
 - The app's updater (`Updater.swift`) reads `releases/latest` from `rohitDurbha/Redfox` and expects a `.dmg` asset containing `Redfox.app`.
 - After pushing, check the run with `gh run list --repo rohitDurbha/Redfox` and `gh run view <id> --log-failed`. Fix compile errors before telling Rohit a release is ready.
 
