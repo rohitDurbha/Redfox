@@ -9,6 +9,7 @@ Redfox is a personal menu bar utility for the Mac that converts, compresses and 
 1. Open the [latest release](https://github.com/rohitDurbha/Redfox/releases/latest) and download the file called Redfox.dmg.
 2. Open the disk image and drag the Redfox icon onto the Applications folder shown beside it.
 3. Open Redfox from your Applications folder, and look for the small fox that appears in your menu bar.
+4. Follow the short welcome guide, whose last step lets you set the haptic strength and the click sound before you begin.
 
 ### The first launch on a new Mac
 
