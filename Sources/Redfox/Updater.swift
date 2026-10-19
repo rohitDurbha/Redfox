@@ -72,7 +72,7 @@ enum Updater {
         alert.messageText = "Redfox \(version) is available"
         let trimmed = cleanNotes(notes)
         alert.informativeText = "You have version \(currentVersion)."
-            + (trimmed.isEmpty ? "" : "\n\nWhat changed in this release\n\(String(trimmed.prefix(600)))")
+            + (trimmed.isEmpty ? "" : "\n\nWhat changed in this release:\n\(String(trimmed.prefix(700)))")
         alert.addButton(withTitle: "Install and Relaunch")
         alert.addButton(withTitle: "View on GitHub")
         alert.addButton(withTitle: "Later")
@@ -83,17 +83,25 @@ enum Updater {
         }
     }
 
-    /// Drops commit trailers such as co-author and session lines, so only the real notes show.
+    /// Tidies release notes for the dialog. It drops commit trailers and merge lines,
+    /// turns Markdown bullets into round bullets and removes Markdown emphasis.
     static func cleanNotes(_ notes: String) -> String {
-        let hidden = ["co-authored-by:", "claude-session:", "signed-off-by:"]
-        return notes
-            .components(separatedBy: .newlines)
-            .filter { line in
-                let lower = line.trimmingCharacters(in: .whitespaces).lowercased()
-                return !hidden.contains { lower.hasPrefix($0) }
+        let hidden = ["co-authored-by:", "claude-session:", "signed-off-by:", "merge pull request", "merge branch"]
+        var lines: [String] = []
+        for raw in notes.components(separatedBy: .newlines) {
+            var line = raw.trimmingCharacters(in: .whitespaces)
+            let lower = line.lowercased()
+            if hidden.contains(where: { lower.hasPrefix($0) }) { continue }
+            if line.hasPrefix("- ") || line.hasPrefix("* ") { line = "• " + line.dropFirst(2) }
+            line = line.replacingOccurrences(of: "**", with: "").replacingOccurrences(of: "`", with: "")
+            if let range = line.range(of: #"^[Rr]elease v?[0-9.]+\s*[:-]?\s*"#, options: .regularExpression) {
+                line.removeSubrange(range)
+                if let first = line.first { line = first.uppercased() + line.dropFirst() }
             }
-            .joined(separator: "\n")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+            if line.isEmpty, lines.last?.isEmpty ?? true { continue }
+            lines.append(line)
+        }
+        return lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     /// Downloads the DMG, mounts it, and hands off to a tiny shell script that swaps the

@@ -8,6 +8,7 @@ Redfox is Rohit's personal macOS menu bar app (Swift Package, SwiftUI plus AppKi
 - On that branch, raise the number in the `VERSION` file to the new release (one patch step above the latest release unless Rohit asks otherwise).
 - Push the branch, open a pull request into `main` through the REST API (`gh api repos/rohitDurbha/Redfox/pulls -f head=... -f base=main ...`), and wait for its checks to pass. Fix any failures on the same branch.
 - Rohit reviews and merges the pull request himself. Do not merge it unless he explicitly asks.
+- The pull request becomes the release notes shown in the app's update dialog. Title it `Release vX.Y.Z: short summary in plain words`, and put each user-facing change on its own `- ` bullet line in the description. Only the title and the bullet lines are published, so keep internal notes in other paragraphs and keep bullets short and friendly.
 
 ## Releasing
 
