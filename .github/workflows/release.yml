@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Use the newest stable Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -39,7 +39,7 @@ jobs:
         run: scripts/make-dmg.sh
 
       - name: Keep the DMG with this run
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Redfox-${{ steps.version.outputs.value }}
           path: build/Redfox.dmg
