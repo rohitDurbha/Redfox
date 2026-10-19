@@ -1,0 +1,56 @@
+name: Build and release
+
+# Every push to main builds Redfox on a GitHub Mac, packages Redfox.dmg and
+# publishes it as the latest release. The app checks that release for updates.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use the newest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Work out the version
+        id: version
+        run: echo "value=1.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build the app
+        run: |
+          chmod +x scripts/*.sh
+          scripts/build-app.sh "${{ steps.version.outputs.value }}"
+
+      - name: Package the disk image
+        run: scripts/make-dmg.sh
+
+      - name: Keep the DMG with this run
+        uses: actions/upload-artifact@v4
+        with:
+          name: Redfox-${{ steps.version.outputs.value }}
+          path: build/Redfox.dmg
+
+      - name: Publish the release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES="$(git log -1 --pretty=%B)"
+          gh release create "v${{ steps.version.outputs.value }}" build/Redfox.dmg \
+            --title "Redfox ${{ steps.version.outputs.value }}" \
+            --notes "$NOTES" \
+            --latest
