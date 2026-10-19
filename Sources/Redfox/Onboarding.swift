@@ -51,8 +51,10 @@ struct OnboardingView: View {
     @StateObject private var wheel = WheelModel()
     @StateObject private var page = ViewState(0)
     @StateObject private var launchAtLogin = ViewState(LoginItem.isEnabled)
+    @ObservedObject private var prefs = Preferences.shared
     private let timer = Timer.publish(every: 0.9, on: .main, in: .common).autoconnect()
-    private let pageCount = 5
+    private let pageCount = 6
+    private let feelPage = 5
 
     var body: some View {
         ZStack {
@@ -63,7 +65,8 @@ struct OnboardingView: View {
                 case 1: step(title: "File Converter", text: "Hold a file from Finder, tap Shift, and drop it on a format. The copy is saved right next to the original.", key: KeyCap(symbol: "⇧", label: "shift", wide: true))
                 case 2: step(title: "File Tools", text: "Tap Command while dragging to compress, crop, redact, annotate, trim or read metadata.", key: KeyCap(symbol: "⌘", label: "command", wide: false))
                 case 3: step(title: "File Actions", text: "Tap Control while dragging to AirDrop, float, copy, move or open a file in Terminal.", key: KeyCap(symbol: "⌃", label: "control", wide: false))
-                default: ready
+                case 4: ready
+                default: feel
                 }
             }
             .foregroundStyle(.white)
@@ -84,8 +87,10 @@ struct OnboardingView: View {
         .onChange(of: page.value) { _ in configure() }
         .onChange(of: launchAtLogin.value) { LoginItem.set($0) }
         .onReceive(timer) { _ in
-            guard (1...3).contains(page.value), !wheel.options.isEmpty else { return }
+            guard [1, 2, 3, feelPage].contains(page.value), !wheel.options.isEmpty else { return }
             wheel.highlighted = ((wheel.highlighted ?? -1) + 1) % wheel.options.count
+            // On the last step the preview plays the real feedback, so people feel each setting live.
+            if page.value == feelPage { Feedback.hover() }
         }
     }
 
@@ -144,7 +149,7 @@ struct OnboardingView: View {
                     .foregroundStyle(.white.opacity(0.55))
             }
             .buttonStyle(.plain)
-            Text("You are all set")
+            Text("It lives in your menu bar")
                 .font(.system(size: 36, weight: .bold))
             Text("Redfox lives in the menu bar as a small fox icon. Start a drag in Finder and tap a key whenever you need it.")
                 .font(.system(size: 15))
@@ -157,14 +162,74 @@ struct OnboardingView: View {
                 .font(.system(size: 13))
                 .foregroundStyle(.white.opacity(0.6))
                 .fixedSize(horizontal: false, vertical: true)
-            Button("Start Using Redfox") {
-                UserDefaults.standard.set(true, forKey: "redfox.onboarded")
-                box.close()
-            }
-            .buttonStyle(PillButtonStyle())
-            .padding(.top, 6)
+            Button("Continue") { page.value += 1 }
+                .buttonStyle(PillButtonStyle())
+                .padding(.top, 6)
         }
         .frame(width: 520, alignment: .leading)
+    }
+
+    /// The final step, where people tune the haptic tap and the click before they begin.
+    private var feel: some View {
+        HStack(spacing: 48) {
+            WheelView(model: wheel, preview: true)
+                .frame(width: 340, height: 340)
+            VStack(alignment: .leading, spacing: 18) {
+                Button { page.value -= 1 } label: {
+                    Label("Back", systemImage: "arrow.left")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.white.opacity(0.55))
+                }
+                .buttonStyle(.plain)
+                Text("Feel the wheel")
+                    .font(.system(size: 36, weight: .bold))
+                Text("Each petal you pass gives a light tap on the trackpad and a soft click. Rest a finger on the trackpad to feel the preview, and change anything you like.")
+                    .font(.system(size: 14))
+                    .foregroundStyle(.white.opacity(0.6))
+                    .fixedSize(horizontal: false, vertical: true)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Haptic strength").font(.system(size: 13, weight: .semibold))
+                    Picker("Haptic strength", selection: $prefs.haptic) {
+                        ForEach(Preferences.Haptic.allCases) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Sound").font(.system(size: 13, weight: .semibold))
+                        Spacer()
+                        Picker("Sound", selection: $prefs.sound) {
+                            ForEach(Preferences.Sound.allCases) { Text($0.title).tag($0) }
+                        }
+                        .labelsHidden()
+                        .frame(width: 150)
+                    }
+                    HStack(spacing: 10) {
+                        Image(systemName: "speaker.fill").foregroundStyle(.white.opacity(0.5))
+                        Slider(value: $prefs.volume, in: 0...1)
+                            .tint(Theme.accent)
+                        Image(systemName: "speaker.wave.3.fill").foregroundStyle(.white.opacity(0.5))
+                    }
+                    .disabled(prefs.sound == .off)
+                    .opacity(prefs.sound == .off ? 0.4 : 1)
+                }
+
+                Text("You can change these any time in Settings from the fox menu.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.white.opacity(0.45))
+
+                Button("Start Using Redfox") {
+                    UserDefaults.standard.set(true, forKey: "redfox.onboarded")
+                    box.close()
+                }
+                .buttonStyle(PillButtonStyle())
+            }
+            .frame(width: 380, alignment: .leading)
+        }
+        .environment(\.colorScheme, .dark)
     }
 
     private func configure() {
@@ -176,6 +241,9 @@ struct OnboardingView: View {
         case 2:
             wheel.mode = .tools
             items = [("COMPRESS", "arrow.down.right.and.arrow.up.left"), ("METADATA", "tag"), ("EDIT", "slider.horizontal.3"), ("ANNOTATE", "pencil.tip.crop.circle"), ("ADD BG", "photo"), ("CROP", "crop"), ("REDACT", "eye.slash")]
+        case 5:
+            wheel.mode = .convert
+            items = [("PNG", nil), ("WEBP", nil), ("HEIC", nil), ("TIFF", nil), ("AVIF", nil), ("BMP", nil), ("PDF", nil), ("JPG", nil)]
         case 3:
             wheel.mode = .actions
             items = [("AIRDROP", "antenna.radiowaves.left.and.right"), ("FLOAT", "pin.fill"), ("COPY", "doc.on.doc"), ("MOVE", "folder"), ("COPY PATH", "doc.text"), ("TERMINAL", "terminal")]
