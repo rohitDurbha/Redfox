@@ -1,7 +1,8 @@
 name: Build and release
 
-# Every push to main builds Redfox on a GitHub Mac, packages Redfox.dmg and
-# publishes it as the latest release. The app checks that release for updates.
+# Pull requests build and test Redfox and check that VERSION is newer than the latest
+# release. Merging into main builds Redfox.dmg and publishes it as release v<VERSION>.
+# The app checks that release for updates.
 on:
   push:
     branches: [main]
@@ -26,9 +27,22 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Work out the version
+      - name: Read and check the version
         id: version
-        run: echo "value=1.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+          LATEST="$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name 2>/dev/null | sed 's/^v//' || true)"
+          echo "VERSION file says $VERSION, latest release is ${LATEST:-none}"
+          if [ -n "$LATEST" ]; then
+            NEWEST="$(printf '%s\n%s\n' "$LATEST" "$VERSION" | sort -V | tail -1)"
+            if [ "$VERSION" = "$LATEST" ] || [ "$NEWEST" != "$VERSION" ]; then
+              echo "::error::VERSION ($VERSION) must be higher than the latest release ($LATEST). Bump it in the VERSION file."
+              exit 1
+            fi
+          fi
 
       - name: Reuse the downloaded ffmpeg between builds
         uses: actions/cache@v4
@@ -54,7 +68,7 @@ jobs:
           path: build/Redfox.dmg
 
       - name: Publish the release
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
