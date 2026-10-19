@@ -70,7 +70,7 @@ enum Updater {
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
         alert.messageText = "Redfox \(version) is available"
-        let trimmed = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = cleanNotes(notes)
         alert.informativeText = "You have version \(currentVersion)."
             + (trimmed.isEmpty ? "" : "\n\nWhat changed in this release\n\(String(trimmed.prefix(600)))")
         alert.addButton(withTitle: "Install and Relaunch")
@@ -81,6 +81,19 @@ enum Updater {
         case .alertSecondButtonReturn: NSWorkspace.shared.open(page)
         default: break
         }
+    }
+
+    /// Drops commit trailers such as co-author and session lines, so only the real notes show.
+    static func cleanNotes(_ notes: String) -> String {
+        let hidden = ["co-authored-by:", "claude-session:", "signed-off-by:"]
+        return notes
+            .components(separatedBy: .newlines)
+            .filter { line in
+                let lower = line.trimmingCharacters(in: .whitespaces).lowercased()
+                return !hidden.contains { lower.hasPrefix($0) }
+            }
+            .joined(separator: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     /// Downloads the DMG, mounts it, and hands off to a tiny shell script that swaps the

@@ -49,7 +49,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          NOTES="$(git log -1 --pretty=%B)"
+          # Keep only the human-written part of the commit message, without trailers.
+          NOTES="$(git log -1 --pretty=%B | grep -viE '^(co-authored-by|claude-session|signed-off-by):' | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')"
+          [ -n "$NOTES" ] || NOTES="Bug fixes and improvements."
           gh release create "v${{ steps.version.outputs.value }}" build/Redfox.dmg \
             --title "Redfox ${{ steps.version.outputs.value }}" \
             --notes "$NOTES" \
