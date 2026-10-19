@@ -136,7 +136,10 @@ enum Images {
             let temp = Paths.temp(ext: "png")
             defer { try? FileManager.default.removeItem(at: temp) }
             try encode(try load(url), ext: "png").write(to: temp)
-            try await FFmpeg.convert(temp, to: out, args: ext == "webp" ? ["-quality", "85"] : [])
+            let args = ext == "webp"
+                ? ["-c:v", "libwebp", "-quality", "85"]
+                : ["-c:v", "libaom-av1", "-still-picture", "1", "-crf", "30", "-cpu-used", "6"]
+            try await FFmpeg.convert(temp, to: out, args: args)
             return out
         }
         var image = try load(url)

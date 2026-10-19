@@ -153,20 +153,10 @@ struct OnboardingView: View {
             Toggle("Launch Redfox when I log in", isOn: $launchAtLogin.value)
                 .toggleStyle(.switch)
                 .tint(Theme.accent)
-            VStack(alignment: .leading, spacing: 6) {
-                Text(FFmpeg.available ? "ffmpeg is installed, so MKV, WebM, AVI, MP3, FLAC, OGG and Opus are enabled." : "For MKV, WebM, AVI, MP3, FLAC, OGG and Opus, install ffmpeg once with Homebrew by running this command in Terminal.")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.white.opacity(0.6))
-                    .fixedSize(horizontal: false, vertical: true)
-                if !FFmpeg.available {
-                    Text("brew install ffmpeg")
-                        .font(.system(size: 13, design: .monospaced))
-                        .textSelection(.enabled)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.white.opacity(0.08)))
-                }
-            }
+            Text("Every format is built in, including MKV, WebM, AVI, MP3, FLAC, OGG and Opus, so there is nothing else to install.")
+                .font(.system(size: 13))
+                .foregroundStyle(.white.opacity(0.6))
+                .fixedSize(horizontal: false, vertical: true)
             Button("Start Using Redfox") {
                 UserDefaults.standard.set(true, forKey: "redfox.onboarded")
                 box.close()

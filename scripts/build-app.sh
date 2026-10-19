@@ -23,6 +23,13 @@ cp Resources/Info.plist "$APP/Contents/Info.plist"
 iconutil -c icns Resources/AppIcon.iconset -o "$APP/Contents/Resources/AppIcon.icns"
 cp Resources/MenuBarIcon.png Resources/MenuBarIcon@2x.png Resources/Logo.png "$APP/Contents/Resources/"
 
+echo "==> Bundling ffmpeg"
+scripts/fetch-ffmpeg.sh
+cp vendor/ffmpeg "$APP/Contents/MacOS/ffmpeg"
+chmod +x "$APP/Contents/MacOS/ffmpeg"
+
 echo "==> Signing (ad hoc)"
-codesign --force --deep --sign - "$APP"
+codesign --force --sign - "$APP/Contents/MacOS/ffmpeg"
+codesign --force --sign - "$APP"
+codesign --verify --strict "$APP"
 echo "Built $APP"

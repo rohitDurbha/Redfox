@@ -139,8 +139,14 @@ enum Shell {
 }
 
 enum FFmpeg {
+    /// Redfox ships its own static ffmpeg inside the app bundle. A system copy is only
+    /// used as a fallback, for example when running a development build without one.
     static var path: String? {
-        ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/opt/local/bin/ffmpeg"]
+        if let bundled = Bundle.main.url(forAuxiliaryExecutable: "ffmpeg")?.path,
+           FileManager.default.isExecutableFile(atPath: bundled) {
+            return bundled
+        }
+        return ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/opt/local/bin/ffmpeg"]
             .first { FileManager.default.isExecutableFile(atPath: $0) }
     }
 
@@ -148,7 +154,7 @@ enum FFmpeg {
 
     static func convert(_ input: URL, to output: URL, args: [String]) async throws {
         guard let ffmpeg = path else {
-            throw RFError("This conversion needs ffmpeg. Open Terminal, run “brew install ffmpeg”, and then try again.")
+            throw RFError("The media engine that ships inside Redfox is missing. Please reinstall Redfox from the latest release.")
         }
         try await Shell.run(ffmpeg, ["-y", "-hide_banner", "-loglevel", "error", "-i", input.path] + args + [output.path])
     }

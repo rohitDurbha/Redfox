@@ -30,10 +30,19 @@ jobs:
         id: version
         run: echo "value=1.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
 
+      - name: Reuse the downloaded ffmpeg between builds
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ffmpeg-${{ hashFiles('scripts/fetch-ffmpeg.sh') }}
+
       - name: Build the app
         run: |
           chmod +x scripts/*.sh
           scripts/build-app.sh "${{ steps.version.outputs.value }}"
+
+      - name: Test every bundled encoder
+        run: scripts/smoke-test-ffmpeg.sh
 
       - name: Package the disk image
         run: scripts/make-dmg.sh

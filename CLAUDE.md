@@ -8,6 +8,11 @@ Redfox is Rohit's personal macOS menu bar app (Swift Package, SwiftUI plus AppKi
 - The app's updater (`Updater.swift`) reads `releases/latest` from `rohitDurbha/Redfox` and expects a `.dmg` asset containing `Redfox.app`.
 - After pushing, check the run with `gh run list --repo rohitDurbha/Redfox` and `gh run view <id> --log-failed`. Fix compile errors before telling Rohit a release is ready.
 
+## Bundled ffmpeg
+
+- A static Apple silicon ffmpeg ships inside the app at `Contents/MacOS/ffmpeg`. `scripts/fetch-ffmpeg.sh` pins the build and verifies its checksum, and `scripts/smoke-test-ffmpeg.sh` runs in CI to prove every encoder Redfox calls still works.
+- When adding a new ffmpeg conversion, add a matching line to the smoke test.
+
 ## Commit identity
 
 - Every commit must be authored and committed as `Rohit Durbha <55520009+rohitDurbha@users.noreply.github.com>`. Set this with `git config user.name` and `git config user.email` in the clone before committing.

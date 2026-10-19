@@ -24,13 +24,9 @@ xattr -dr com.apple.quarantine /Applications/Redfox.app
 
 Redfox checks GitHub for a newer release about once a day, and you can also choose Check for Updates from the fox menu at any time. When a new version exists, clicking Install and Relaunch downloads the new disk image, replaces the app in place and opens the new version for you.
 
-### Optional extra formats
+### Every format is built in
 
-Apple's built in frameworks already handle the common formats, but MKV, WebM, AVI, MP3, FLAC, OGG and Opus rely on the free ffmpeg tool. If you use Homebrew, you can install it with the command below, and Redfox will notice it automatically.
-
-```
-brew install ffmpeg
-```
+Redfox ships with its own copy of the open source [ffmpeg](https://ffmpeg.org) media engine inside the app, so MKV, WebM, AVI, MP3, FLAC, OGG, Opus, WebP and AVIF all work right after you install it. You do not need Homebrew or any other separate download.
 
 ## Using Redfox
 
@@ -43,6 +39,10 @@ Start dragging any file in Finder, and while you are still holding the mouse but
 | Control | Actions | AirDrop, float on a shelf, copy, move, copy the path or open the folder in Terminal |
 
 Every result is saved beside the original with a short suffix such as "compressed" or "edited", and Redfox never overwrites the file you started with.
+
+## About the bundled media engine
+
+The ffmpeg binary comes from the static Apple silicon builds published at [ffmpeg.martin-riedl.de](https://ffmpeg.martin-riedl.de), and its version is pinned in `scripts/fetch-ffmpeg.sh`. Each build checks the download against its published checksum, and the release workflow then tests every encoder Redfox uses before it publishes a new disk image. ffmpeg is free software released under the GPL, and its complete source code is available from [ffmpeg.org](https://ffmpeg.org/download.html).
 
 ## How releases are made
 
@@ -64,7 +64,7 @@ scripts/install-local.sh
 | --- | --- |
 | `Sources/Redfox/App.swift` | App entry point, menu bar menu, theme, windows, alerts and toasts |
 | `Sources/Redfox/Wheel.swift` | Drag detection, the radial glass wheel and its drop handling |
-| `Sources/Redfox/Core.swift` | File kinds, paths, ffmpeg, the wheel catalogs and job wiring |
+| `Sources/Redfox/Core.swift` | File kinds, paths, the bundled ffmpeg, the wheel catalogs and job wiring |
 | `Sources/Redfox/JobRunner.swift` | Background jobs and the progress cards |
 | `Sources/Redfox/ImageEngine.swift` | Image conversion, compression, metadata, QR reading and backgrounds |
 | `Sources/Redfox/MediaEngine.swift` | Video and audio conversion, compression and editing |
@@ -73,6 +73,8 @@ scripts/install-local.sh
 | `Sources/Redfox/Shelf.swift` | File actions and the floating shelf |
 | `Sources/Redfox/Onboarding.swift` | The welcome screens |
 | `Sources/Redfox/Updater.swift` | Checks GitHub releases and installs updates in place |
-| `scripts/build-app.sh` | Compiles the code and assembles Redfox.app |
+| `scripts/build-app.sh` | Compiles the code, bundles ffmpeg and assembles Redfox.app |
+| `scripts/fetch-ffmpeg.sh` | Downloads the pinned static ffmpeg build and verifies its checksum |
+| `scripts/smoke-test-ffmpeg.sh` | Runs every ffmpeg conversion against the bundled copy before a release |
 | `scripts/make-dmg.sh` | Wraps the app in a drag to install disk image |
 | `scripts/install-local.sh` | Builds and installs the app on the current Mac |

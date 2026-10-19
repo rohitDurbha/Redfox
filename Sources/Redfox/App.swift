@@ -43,8 +43,6 @@ struct MenuContent: View {
         Toggle("Pause Redfox", isOn: $paused.value)
             .onChange(of: paused.value) { DragMonitor.shared.paused = $0 }
         Divider()
-        Text(FFmpeg.available ? "Extra formats enabled (ffmpeg found)" : "Install ffmpeg for MKV, WebM, MP3 and more")
-        Divider()
         Text("Version \(Updater.currentVersion)")
         Button("Quit Redfox") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
